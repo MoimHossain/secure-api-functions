@@ -19,7 +19,7 @@ resource subnet 'Microsoft.Network/virtualNetworks/subnets@2023-02-01' existing 
   name: subnetName
 }
 
-module publicIpAddress 'ip-address.bicep' = {
+module publicIpAddress '../network/ip-address.bicep' = {
   name: publicIpAddressName  
   params: {
     name: publicIpAddressName
