@@ -5,6 +5,12 @@ param serverFarmName string
 param vnetName string
 param functionAppName string
 
+param apimServiceName string
+param publicIpAddressName string
+param publisherEmail string
+param publisherName string
+param sku string
+param skuCount int
 
 var dnsZoneName = 'privatelink.azurewebsites.net'
 var endpointName = '${functionAppName}-private-endpoint'
@@ -57,4 +63,19 @@ module privateEndpoint 'modules/network/private-endpoints/endpoint.bicep' = {
 }
 
 
+
+module apimService 'modules/api-management/apim.bicep' = {
+  name: apimServiceName
+  params: {
+    apimServiceName: apimServiceName
+    location: location
+    sku: sku
+    skuCount: skuCount
+    publisherEmail: publisherEmail
+    publisherName: publisherName
+    publicIpAddressName: publicIpAddressName
+    subnetName: virtualNetwork.outputs.apimSubnetName
+    virtualNetworkName: virtualNetwork.name
+  }
+}
 
