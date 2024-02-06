@@ -1,9 +1,9 @@
 #!/bin/bash
 
-export resourceGroupName="APIM-DEVOPS"
+export resourceGroupName="APIM-DEVOPS-DEMO2"
 export location="westeurope"
-export APP_NAME="casazul"
-export APP_ENV="dev"
+export APP_NAME="casazulx"
+export APP_ENV="devx"
 
 echo "Starting Infrastructure provisioning..."
 

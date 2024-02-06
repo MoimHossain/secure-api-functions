@@ -1,13 +1,22 @@
 
 param name string
 param serverFarmId string
+param functionUAMIName string
 param location string = resourceGroup().location
 
+resource functionUAMI 'Microsoft.ManagedIdentity/userAssignedIdentities@2018-11-30' existing = {
+  name: functionUAMIName
+}
 
 resource functionApp 'Microsoft.Web/sites@2023-01-01' = {
   name: name
   location: location
   kind: 'functionapp'
+  identity: {
+    type: 'UserAssigned'
+    userAssignedIdentities: {
+      '${functionUAMI.id}': {} }
+  }   
   properties: {
     enabled: true   
     serverFarmId: serverFarmId
@@ -38,3 +47,4 @@ resource functionApp 'Microsoft.Web/sites@2023-01-01' = {
 }
 
 output functionAppId string = functionApp.id
+

@@ -23,7 +23,7 @@ resource server 'Microsoft.Sql/servers@2021-05-01-preview' existing = {
   name: serverName
 }
 
-resource serverName_database 'Microsoft.Sql/servers/databases@2023-05-01-preview' = {
+resource sqlDatabase 'Microsoft.Sql/servers/databases@2023-05-01-preview' = {
   location: location  
   parent: server
   name: databaseName
@@ -47,3 +47,6 @@ resource serverName_database 'Microsoft.Sql/servers/databases@2023-05-01-preview
     tier: tier
   }
 }
+
+
+output databaseId string = sqlDatabase.id

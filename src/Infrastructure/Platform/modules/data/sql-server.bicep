@@ -36,8 +36,8 @@ resource server 'Microsoft.Sql/servers@2022-05-01-preview' = {
     
     // administratorLoginPassword: required for server creation - just set to dummy value, will be disabled by deploying '/azureADOnlyAuthentications' later.
     // NOTE: The following only require for the initial server creation. If you are updating an existing server, you can ignore these properties.
-    // administratorLogin: 'sqladmin'    
-    // administratorLoginPassword: guid(serverName)
+    //administratorLogin: 'sqladmin'    
+    //administratorLoginPassword: guid(serverName)
 
     // administrators: The Azure Active Directory administrator of the server. This can only be used at server create time. If used for server update, it will be ignored or it will result in an error. For updates individual APIs will need to be used. 
     administrators: {}
