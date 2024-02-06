@@ -1,36 +1,62 @@
 targetScope = 'resourceGroup'
 
 param location string = resourceGroup().location
-param serverFarmName string 
-param vnetName string
-param functionAppName string
 
-param apimServiceName string
-param publicIpAddressName string
-param publisherEmail string
-param publisherName string
-param sku string
-param skuCount int
+var sqlAdminUAMIName = 'sqlAdminUAMI'
+var sqlServerName = 'nebulasqlServer1'
+var sqlDatabaseName = 'nebulasqlDatabase1'
+var serverFarmName = 'nebulaServerFarm'
+var functionAppName = 'nebulaFunctionApp'
+var allowClientIp = true
+var clientIpValue = '84.87.237.145'
 
-var dnsZoneName = 'privatelink.azurewebsites.net'
-var endpointName = '${functionAppName}-private-endpoint'
 
-module virtualNetwork 'modules/network/virtual-network.bicep' = {
-  name: vnetName
+module sqlAdminUAMI 'modules/shared/identity.bicep' = {
+  name: sqlAdminUAMIName
   params: {
-    vnetName: vnetName
+    uamiName: sqlAdminUAMIName
+    location: location
+  }
+}
+
+module sqlServer 'modules/data/sql-server.bicep' = {
+  name: sqlServerName
+  params: {
+    serverName: sqlServerName
     location: location    
+    sqlAdminUserAssignedIdentityName: sqlAdminUAMI.name
+  }
+  dependsOn: [
+    sqlAdminUAMI  
+  ]
+}
+
+module sqlDatabase 'modules/data/sql-database.bicep' = {
+  name: sqlDatabaseName
+  params: {
+    databaseName: sqlDatabaseName
+    location: location
+    serverName: sqlServer.outputs.sqlServerName
   }
 }
 
-module dnsZone 'modules/network/DnsZone/dns-zone.bicep' = {
-  name: dnsZoneName
-  params: {
-    name: dnsZoneName
-    vnetName: vnetName
-    vnetId: virtualNetwork.outputs.vnetId
-  }
-}
+
+// module virtualNetwork 'modules/network/virtual-network.bicep' = {
+//   name: vnetName
+//   params: {
+//     vnetName: vnetName
+//     location: location    
+//   }
+// }
+
+// module dnsZone 'modules/network/DnsZone/dns-zone.bicep' = {
+//   name: dnsZoneName
+//   params: {
+//     name: dnsZoneName
+//     vnetName: vnetName
+//     vnetId: virtualNetwork.outputs.vnetId
+//   }
+// }
 
 
 module serverFarm 'modules/web/server-farm.bicep' = {
@@ -51,31 +77,31 @@ module functionApp 'modules/web/function-app.bicep' = {
 }
 
 
-module privateEndpoint 'modules/network/private-endpoints/endpoint.bicep' = {
-  name: endpointName
-  params: {
-    dnsZoneId: dnsZone.outputs.dnsZoneId
-    funcAppId: functionApp.outputs.functionAppId
-    name: endpointName
-    subnetId: virtualNetwork.outputs.defaultSubnetId
-    location: location
-  }
-}
+// module privateEndpoint 'modules/network/private-endpoints/endpoint.bicep' = {
+//   name: endpointName
+//   params: {
+//     dnsZoneId: dnsZone.outputs.dnsZoneId
+//     funcAppId: functionApp.outputs.functionAppId
+//     name: endpointName
+//     subnetId: virtualNetwork.outputs.defaultSubnetId
+//     location: location
+//   }
+// }
 
 
 
-module apimService 'modules/api-management/apim.bicep' = {
-  name: apimServiceName
-  params: {
-    apimServiceName: apimServiceName
-    location: location
-    sku: sku
-    skuCount: skuCount
-    publisherEmail: publisherEmail
-    publisherName: publisherName
-    publicIpAddressName: publicIpAddressName
-    subnetName: virtualNetwork.outputs.apimSubnetName
-    virtualNetworkName: virtualNetwork.name
-  }
-}
+// module apimService 'modules/api-management/apim.bicep' = {
+//   name: apimServiceName
+//   params: {
+//     apimServiceName: apimServiceName
+//     location: location
+//     sku: sku
+//     skuCount: skuCount
+//     publisherEmail: publisherEmail
+//     publisherName: publisherName
+//     publicIpAddressName: publicIpAddressName
+//     subnetName: virtualNetwork.outputs.apimSubnetName
+//     virtualNetworkName: virtualNetwork.name
+//   }
+// }
 
