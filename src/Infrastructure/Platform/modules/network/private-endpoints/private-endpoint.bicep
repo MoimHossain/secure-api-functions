@@ -41,7 +41,7 @@ resource privateSqlDnsZone 'Microsoft.Network/privateDnsZones@2018-09-01' = if(c
 
 resource vnetLink 'Microsoft.Network/privateDnsZones/virtualNetworkLinks@2018-09-01' = {
   parent: privateSqlDnsZone
-  name: 'link-${privateEndpointName}-${guid(privateEndpointName)}'
+  name: 'lnk${guid(privateEndpointName)}'
   location: 'global'
   properties: {
     registrationEnabled: false

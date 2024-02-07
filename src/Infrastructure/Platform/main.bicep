@@ -14,7 +14,7 @@ param publisherName string
 param sku string 
 param skuCount int
 param publicIpAddressName string
-
+param publicIpDnsLabel string
 param sqlAdminUAMIName string
 param functionIdentityName string
 param sqlServerName string
@@ -149,6 +149,7 @@ module apimService 'modules/api-management/apim.bicep' = {
     publisherEmail: publisherEmail
     publisherName: publisherName
     publicIpAddressName: publicIpAddressName
+    publicIpDnsLabel: publicIpDnsLabel
     subnetName: virtualNetwork.outputs.apimSubnetName
     virtualNetworkName: virtualNetwork.name
   }

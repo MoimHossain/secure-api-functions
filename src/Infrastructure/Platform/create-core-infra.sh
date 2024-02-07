@@ -1,6 +1,6 @@
 #!/bin/bash
 
-export resourceGroupName="APIM-DEVOPS-CASAUL-RG"
+export resourceGroupName="APIM-DEVOPS-CASAUL-RGX"
 export location="westeurope"
 export APP_NAME="csazulx01"
 export APP_ENV="DV"
