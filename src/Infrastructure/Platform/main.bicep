@@ -54,6 +54,24 @@ module sqlDatabase 'modules/data/sql-database.bicep' = {
   }
 }
 
+module serverFarm 'modules/web/server-farm.bicep' = {
+  name: serverFarmName
+  params: {
+    location: location
+    name: serverFarmName
+  }
+}
+
+module functionApp 'modules/web/function-app.bicep' = {
+  name: functionAppName
+  params: {
+    location: location
+    name: functionAppName
+    functionUAMIName: functionIdentity.name
+    serverFarmId: serverFarm.outputs.serverfarmId    
+  }
+}
+
 
 // module sqlRoleAssignments 'modules/data/sql-database-roles.bicep' = {
 //   name: sqlRoleAssignmentsName
@@ -89,23 +107,7 @@ module sqlDatabase 'modules/data/sql-database.bicep' = {
 // }
 
 
-// module serverFarm 'modules/web/server-farm.bicep' = {
-//   name: serverFarmName
-//   params: {
-//     location: location
-//     name: serverFarmName
-//   }
-// }
 
-// module functionApp 'modules/web/function-app.bicep' = {
-//   name: functionAppName
-//   params: {
-//     location: location
-//     name: functionAppName
-//     functionUAMIName: functionIdentity.name
-//     serverFarmId: serverFarm.outputs.serverfarmId    
-//   }
-// }
 
 
 // module privateEndpoint 'modules/network/private-endpoints/endpoint.bicep' = {
