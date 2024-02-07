@@ -2,26 +2,41 @@ targetScope = 'resourceGroup'
 
 param location string = resourceGroup().location
 
-var sqlAdminUAMIName = 'SQLAdminUAMITSL0'
-var functionIdentityName = 'FuncIdentityTSL0'
-var sqlServerName = 'nebulaSrvrxTSL0'
-var sqlDatabaseName = 'nebulasDbTSL0'
-var serverFarmName = 'nebulaServerFarmTSL0'
-var functionAppName = 'nebulaFuncAppx00TSL0'
-var vnetName = 'nebulavnetTSL0'
-var sqlPrivateEndpointName = 'nebulaSqlPrivateEndpointTSL0'
-var funcPrivateEndpointName = 'nebulaFuncPrivateEndpointTSL0'
+param apimServiceName string
+param publisherEmail string
+param publisherName string
+@allowed([
+  'Premium'
+  'Standard'
+  'Developer'
+  'Basic'
+  'Consumption'])
+param sku string 
+param skuCount int
+param publicIpAddressName string
 
-var allowClientIp = true
-var clientIpValue = '84.87.237.145'
+param sqlAdminUAMIName string
+param functionIdentityName string
+param sqlServerName string
+param sqlDatabaseName string
+param serverFarmName string
+param functionAppName string
+param vnetName string
+
+
+var sqlPrivateEndpointName = '${sqlServerName}-private-endpoint'
+//var funcPrivateEndpointName = '${functionAppName}-private-endpoint'
+
+// var allowClientIp = true
+// var clientIpValue = '84.87.237.145'
 
 var database = 'database'
 var host = 'windows.net'
 var sqlZoneName = 'privatelink.${database}.${host}'
 var sqlZoneGroupName = 'privatelink-database-windows-net'
 
-var funcZoneName = 'privatelink.azurewebsites.net'
-var funcZoneGroupName = 'privatelink-azurewebsites-net'
+// var funcZoneName = 'privatelink.azurewebsites.net'
+// var funcZoneGroupName = 'privatelink-azurewebsites-net'
 
 module sqlAdminUAMI 'modules/shared/identity.bicep' = {
   name: sqlAdminUAMIName
@@ -109,70 +124,33 @@ module functionApp 'modules/web/function-app.bicep' = {
   }
 }
 
-module functionPrivateEndpoint 'modules/network/private-endpoints/private-endpoint.bicep' = {
-  name: funcPrivateEndpointName
+// module functionPrivateEndpoint 'modules/network/private-endpoints/private-endpoint.bicep' = {
+//   name: funcPrivateEndpointName
+//   params: {
+//     location: location
+//     vnetId: virtualNetwork.outputs.vnetId
+//     createPrivateDns: true
+//     zoneFqdn: funcZoneName
+//     zoneGroupName: funcZoneGroupName
+//     privateEndpointName: funcPrivateEndpointName
+//     privateLinkServiceId: functionApp.outputs.functionAppId
+//     subnetId: virtualNetwork.outputs.backendSubnetId
+//     targetSubResource: 'sites' 
+//   }
+// }
+
+module apimService 'modules/api-management/apim.bicep' = {
+  name: apimServiceName
   params: {
+    apimServiceName: apimServiceName
     location: location
-    vnetId: virtualNetwork.outputs.vnetId
-    createPrivateDns: true
-    zoneFqdn: funcZoneName
-    zoneGroupName: funcZoneGroupName
-    privateEndpointName: funcPrivateEndpointName
-    privateLinkServiceId: functionApp.outputs.functionAppId
-    subnetId: virtualNetwork.outputs.backendSubnetId
-    targetSubResource: 'sites' 
+    sku: sku
+    skuCount: skuCount
+    publisherEmail: publisherEmail
+    publisherName: publisherName
+    publicIpAddressName: publicIpAddressName
+    subnetName: virtualNetwork.outputs.apimSubnetName
+    virtualNetworkName: virtualNetwork.name
   }
 }
-
-// until here works
-
-
-
-
-
-
-
-
-
-
-// module dnsZone 'modules/network/DnsZone/dns-zone.bicep' = {
-//   name: dnsZoneName
-//   params: {
-//     name: dnsZoneName
-//     vnetName: vnetName
-//     vnetId: virtualNetwork.outputs.vnetId
-//   }
-// }
-
-
-
-
-
-// module privateEndpoint 'modules/network/private-endpoints/endpoint.bicep' = {
-//   name: endpointName
-//   params: {
-//     dnsZoneId: dnsZone.outputs.dnsZoneId
-//     funcAppId: functionApp.outputs.functionAppId
-//     name: endpointName
-//     subnetId: virtualNetwork.outputs.defaultSubnetId
-//     location: location
-//   }
-// }
-
-
-
-// module apimService 'modules/api-management/apim.bicep' = {
-//   name: apimServiceName
-//   params: {
-//     apimServiceName: apimServiceName
-//     location: location
-//     sku: sku
-//     skuCount: skuCount
-//     publisherEmail: publisherEmail
-//     publisherName: publisherName
-//     publicIpAddressName: publicIpAddressName
-//     subnetName: virtualNetwork.outputs.apimSubnetName
-//     virtualNetworkName: virtualNetwork.name
-//   }
-// }
 
