@@ -1,30 +1,27 @@
 
 param location string = resourceGroup().location
 param vnetName string
-param defaultSubnetName string = 'default' // do NOT change this name
-param apimSubnetName string = 'apimsubnet'
 param addressPrefix string = '10.0.0.0/16'
-param containerSubnetAddressPrefix string = '10.0.2.0/23'
-param apimAddressPrefix string = '10.0.1.0/27'
 
-var apimNsgName = 'nsg-${vnetName}-${apimSubnetName}'
-var defaultNsgName = 'nsg-${vnetName}-${defaultSubnetName}'
+param dataSubnetName string = 'data-subnet'
+param dataSubnetAddressPrefix string = '10.0.0.0/28'
+
+param gatewaySubnetName string = 'gateway-subnet'
+param gatewaySubnetAddressPrefix string = '10.0.1.0/28'
+
+param backendSubnetName string = 'backend-subnet'
+param backendAddressPrefix string = '10.0.2.0/28'
+
+var gatewayNsgName = 'nsg-${vnetName}-${gatewaySubnetName}'
 
 module nsgApim 'NetworkSecurityGroups/apim-subnet-nsg.bicep' = {
-  name: apimNsgName
+  name: gatewayNsgName
   params: {
     location: location
-    nsgName: apimNsgName
+    nsgName: gatewayNsgName
   }
 }
 
-module nsgDefault 'NetworkSecurityGroups/apim-subnet-nsg.bicep' = {
-  name: defaultNsgName
-  params: {
-    location: location
-    nsgName: defaultNsgName
-  }
-}
 
 resource virtualNetwork 'Microsoft.Network/virtualNetworks@2021-05-01' = {
   name: vnetName
@@ -37,47 +34,72 @@ resource virtualNetwork 'Microsoft.Network/virtualNetworks@2021-05-01' = {
     }
     subnets: [
       {
-        name: defaultSubnetName
+        name: dataSubnetName
         properties: {
-          addressPrefix: containerSubnetAddressPrefix
-          networkSecurityGroup: {
-            id: nsgDefault.outputs.nsgId
-          }
+          addressPrefixes: [
+            dataSubnetAddressPrefix
+          ]          
         }
       }
       {
-        name: apimSubnetName
+        name: gatewaySubnetName
         properties: {
-          addressPrefix: apimAddressPrefix
+          addressPrefixes: [
+            gatewaySubnetAddressPrefix
+          ]
           networkSecurityGroup: {
             id: nsgApim.outputs.nsgId
           }
         }
       }
+      {
+        name: backendSubnetName
+        properties: {
+          addressPrefixes: [
+            backendAddressPrefix
+          ]
+          delegations: [
+            {
+              name: 'delegation'              
+              properties: {
+                serviceName: 'Microsoft.Web/serverfarms'
+              }
+              type: 'Microsoft.Network/virtualNetworks/subnets/delegations'
+            }
+          ]
+        }
+      }      
     ]
   }
 }
-
 
 
 resource vnet 'Microsoft.Network/virtualNetworks@2023-02-01' existing = {
   name: virtualNetwork.name
 }
 
-resource defaultSubnet 'Microsoft.Network/virtualNetworks/subnets@2023-02-01' existing = {
+resource dataSubnet 'Microsoft.Network/virtualNetworks/subnets@2023-02-01' existing = {
   parent: vnet
-  name: defaultSubnetName
+  name: dataSubnetName
 }
 
-resource apimSubnet 'Microsoft.Network/virtualNetworks/subnets@2023-02-01' existing = {
+resource gatewaySubnet 'Microsoft.Network/virtualNetworks/subnets@2023-02-01' existing = {
   parent: vnet
-  name: apimSubnetName
+  name: gatewaySubnetName
+}
+
+resource backendSubnet 'Microsoft.Network/virtualNetworks/subnets@2023-02-01' existing = {
+  parent: vnet
+  name: backendSubnetName
 }
 
 output vnetId string = vnet.id
 
-output defaultSubnetName string = defaultSubnet.name
-output defaultSubnetId string = defaultSubnet.id
+output dataSubnetName string = dataSubnet.name
+output dataSubnetId string = dataSubnet.id
 
-output apimSubnetName string = apimSubnet.name
-output apimSubnetId string = apimSubnet.id
+output apimSubnetName string = gatewaySubnet.name
+output apimSubnetId string = gatewaySubnet.id
+
+output backendSubnetName string = backendSubnet.name
+output backendSubnetId string = backendSubnet.id

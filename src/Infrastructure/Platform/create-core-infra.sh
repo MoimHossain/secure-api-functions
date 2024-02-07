@@ -1,11 +1,14 @@
 #!/bin/bash
 
-export resourceGroupName="APIM-DEVOPS"
+export resourceGroupName="APIM-DEVOPS-CASAULRGX"
 export location="westeurope"
-export APP_NAME="solarx"
-export APP_ENV="dev"
+export APP_NAME="cqalx01"
+export APP_ENV="DV"
 
 echo "Starting Infrastructure provisioning..."
+
+# az keyvault list-deleted
+# az keyvault purge -n solarxkeyvaultdev
 
 
 echo "Creating resource group..."

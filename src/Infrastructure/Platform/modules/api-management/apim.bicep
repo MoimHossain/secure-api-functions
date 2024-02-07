@@ -9,6 +9,7 @@ param skuCount int
 param virtualNetworkName string
 param subnetName string
 param publicIpAddressName string
+param publicIpDnsLabel string
 
 resource vnet 'Microsoft.Network/virtualNetworks@2023-02-01' existing = {
   name: virtualNetworkName
@@ -23,7 +24,7 @@ module publicIpAddress '../network/ip-address.bicep' = {
   name: publicIpAddressName  
   params: {
     name: publicIpAddressName
-    domainNameLabel: '${apimServiceName}-pipdns'
+    domainNameLabel: toLower(publicIpDnsLabel)
     location: location
   }
 }

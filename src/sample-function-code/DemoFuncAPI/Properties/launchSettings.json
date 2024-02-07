@@ -1,0 +1,11 @@
+{
+  "profiles": {
+    "DemoFuncAPI": {
+      "commandName": "Project",
+      "commandLineArgs": "--port 7083",
+      "environmentVariables": {
+        "sqldb_connection": "Server=tcp:nebulasqlserver.database.windows.net,1433;Initial Catalog=nebulasqlDatabase;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;Authentication=\"Active Directory Default\";"
+      }
+    }
+  }
+}

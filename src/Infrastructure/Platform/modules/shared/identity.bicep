@@ -12,3 +12,4 @@ resource uami 'Microsoft.ManagedIdentity/userAssignedIdentities@2018-11-30' = {
 output principalId string = uami.properties.principalId
 output tenantId string = uami.properties.tenantId
 output clientId string = uami.properties.clientId
+output name string = uami.name
