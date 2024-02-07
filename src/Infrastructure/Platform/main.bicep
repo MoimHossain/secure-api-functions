@@ -60,51 +60,51 @@ module virtualNetwork 'modules/network/virtual-network.bicep' = {
   }
 }
 
-// module sqlServer 'modules/data/sql-server.bicep' = {
-//   name: sqlServerName
-//   params: {
-//     serverName: sqlServerName
-//     location: location
+module sqlServer 'modules/data/sql-server.bicep' = {
+  name: sqlServerName
+  params: {
+    serverName: sqlServerName
+    location: location
     
-//     sqlAdminUserAssignedIdentityName: sqlAdminUAMI.name
-//     azureADOnlyAuthentication: false
-//     publicNetworkAccess: 'Disabled'
+    sqlAdminUserAssignedIdentityName: sqlAdminUAMI.name
+    azureADOnlyAuthentication: false
+    publicNetworkAccess: 'Disabled'
 
-//     // For local testing    
-//     // allowClientIp: allowClientIp
-//     // clientIpValue: clientIpValue
-//     // allowAzureIps: true
-//   }
-//   dependsOn: [
-//     sqlAdminUAMI  
-//   ]
-// }
+    // For local testing    
+    // allowClientIp: allowClientIp
+    // clientIpValue: clientIpValue
+    // allowAzureIps: true
+  }
+  dependsOn: [
+    sqlAdminUAMI  
+  ]
+}
 
-// module sqlDatabase 'modules/data/sql-database.bicep' = {
-//   name: sqlDatabaseName
-//   params: {
-//     databaseName: sqlDatabaseName
-//     location: location
-//     serverName: sqlServer.outputs.sqlServerName
-//   }
-// }
+module sqlDatabase 'modules/data/sql-database.bicep' = {
+  name: sqlDatabaseName
+  params: {
+    databaseName: sqlDatabaseName
+    location: location
+    serverName: sqlServer.outputs.sqlServerName
+  }
+}
 
 
 
-// module sqlPrivateEndpoint 'modules/network/private-endpoints/private-endpoint.bicep' = {
-//   name: sqlPrivateEndpointName
-//   params: {
-//     location: location
-//     vnetId: virtualNetwork.outputs.vnetId
-//     createPrivateDns: true
-//     zoneFqdn: sqlZoneName
-//     zoneGroupName: sqlZoneGroupName
-//     privateEndpointName: sqlPrivateEndpointName
-//     privateLinkServiceId: sqlServer.outputs.sqlServerResourceId
-//     subnetId: virtualNetwork.outputs.dataSubnetId
-//     targetSubResource: 'sqlServer' 
-//   }
-// }
+module sqlPrivateEndpoint 'modules/network/private-endpoints/private-endpoint.bicep' = {
+  name: sqlPrivateEndpointName
+  params: {
+    location: location
+    vnetId: virtualNetwork.outputs.vnetId
+    createPrivateDns: true
+    zoneFqdn: sqlZoneName
+    zoneGroupName: sqlZoneGroupName
+    privateEndpointName: sqlPrivateEndpointName
+    privateLinkServiceId: sqlServer.outputs.sqlServerResourceId
+    subnetId: virtualNetwork.outputs.dataSubnetId
+    targetSubResource: 'sqlServer' 
+  }
+}
 
 module serverFarm 'modules/web/server-farm.bicep' = {
   name: serverFarmName
