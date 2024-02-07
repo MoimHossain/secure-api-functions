@@ -10,11 +10,18 @@ var serverFarmName = 'nebulaServerFarmTSL0'
 var functionAppName = 'nebulaFuncAppx00TSL0'
 var vnetName = 'nebulavnetTSL0'
 var sqlPrivateEndpointName = 'nebulaSqlPrivateEndpointTSL0'
+var funcPrivateEndpointName = 'nebulaFuncPrivateEndpointTSL0'
 
 var allowClientIp = true
 var clientIpValue = '84.87.237.145'
 
+var database = 'database'
+var host = 'windows.net'
+var sqlZoneName = 'privatelink.${database}.${host}'
+var sqlZoneGroupName = 'privatelink-database-windows-net'
 
+var funcZoneName = 'privatelink.azurewebsites.net'
+var funcZoneGroupName = 'privatelink-azurewebsites-net'
 
 module sqlAdminUAMI 'modules/shared/identity.bicep' = {
   name: sqlAdminUAMIName
@@ -23,7 +30,6 @@ module sqlAdminUAMI 'modules/shared/identity.bicep' = {
     location: location
   }
 }
-
 module functionIdentity 'modules/shared/identity.bicep' = {
   name: functionIdentityName
   params: {
@@ -31,8 +37,6 @@ module functionIdentity 'modules/shared/identity.bicep' = {
     location: location
   }
 }
-
-
 module virtualNetwork 'modules/network/virtual-network.bicep' = {
   name: vnetName
   params: {
@@ -40,10 +44,6 @@ module virtualNetwork 'modules/network/virtual-network.bicep' = {
     location: location    
   }
 }
-
-
-
-
 module sqlServer 'modules/data/sql-server.bicep' = {
   name: sqlServerName
   params: {
@@ -73,12 +73,16 @@ module sqlDatabase 'modules/data/sql-database.bicep' = {
   }
 }
 
+
+
 module sqlPrivateEndpoint 'modules/network/private-endpoints/private-endpoint.bicep' = {
   name: sqlPrivateEndpointName
   params: {
     location: location
     vnetId: virtualNetwork.outputs.vnetId
     createPrivateDns: true
+    zoneFqdn: sqlZoneName
+    zoneGroupName: sqlZoneGroupName
     privateEndpointName: sqlPrivateEndpointName
     privateLinkServiceId: sqlServer.outputs.sqlServerResourceId
     subnetId: virtualNetwork.outputs.dataSubnetId
@@ -102,6 +106,21 @@ module functionApp 'modules/web/function-app.bicep' = {
     delegatedSubnetResourceId: virtualNetwork.outputs.backendSubnetId
     functionUAMIName: functionIdentity.name
     serverFarmId: serverFarm.outputs.serverfarmId    
+  }
+}
+
+module functionPrivateEndpoint 'modules/network/private-endpoints/private-endpoint.bicep' = {
+  name: funcPrivateEndpointName
+  params: {
+    location: location
+    vnetId: virtualNetwork.outputs.vnetId
+    createPrivateDns: true
+    zoneFqdn: funcZoneName
+    zoneGroupName: funcZoneGroupName
+    privateEndpointName: funcPrivateEndpointName
+    privateLinkServiceId: functionApp.outputs.functionAppId
+    subnetId: virtualNetwork.outputs.backendSubnetId
+    targetSubResource: 'sites' 
   }
 }
 

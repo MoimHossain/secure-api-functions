@@ -8,12 +8,9 @@ param privateLinkServiceId string
   'sites'
 ])
 param targetSubResource string
+param zoneGroupName string
+param zoneFqdn string
 param createPrivateDns bool = true
-
-var database = 'database'
-var host = 'windows.net'
-var zoneName = 'privatelink.${database}.${host}'
-var linkName = 'link-${privateEndpointName}-${guid(privateEndpointName)}'
 
 resource privateEndpoint 'Microsoft.Network/privateEndpoints@2021-05-01' = {
   location: location
@@ -38,13 +35,13 @@ resource privateEndpoint 'Microsoft.Network/privateEndpoints@2021-05-01' = {
 }
 
 resource privateSqlDnsZone 'Microsoft.Network/privateDnsZones@2018-09-01' = if(createPrivateDns) {
-  name: zoneName
+  name: zoneFqdn
   location: 'global'
 }
 
 resource vnetLink 'Microsoft.Network/privateDnsZones/virtualNetworkLinks@2018-09-01' = {
   parent: privateSqlDnsZone
-  name: linkName
+  name: 'link-${privateEndpointName}-${guid(privateEndpointName)}'
   location: 'global'
   properties: {
     registrationEnabled: false
@@ -60,7 +57,7 @@ resource privateDnsZoneGroups 'Microsoft.Network/privateEndpoints/privateDnsZone
   properties: {
     privateDnsZoneConfigs: [
       {
-        name: 'privatelink-database-windows-net'
+        name: zoneGroupName
         properties: {
           privateDnsZoneId: privateSqlDnsZone.id
         }
