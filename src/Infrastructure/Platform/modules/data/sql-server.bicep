@@ -2,7 +2,7 @@
 
 param location string = resourceGroup().location
 param serverName string
-
+param azureADOnlyAuthentication bool = false
 param sqlAdminUserAssignedIdentityName string 
 
 param minimalTlsVersion string = '1.2'
@@ -20,10 +20,12 @@ param identity object = {
   type: 'SystemAssigned'
 }
 
+var sqlAdminLoginName = 'sqladmin'
+var sqlAdminCode = guid(serverName)
+
 resource uami 'Microsoft.ManagedIdentity/userAssignedIdentities@2018-11-30' existing = {
   name: sqlAdminUserAssignedIdentityName  
 }
-
 
 
 resource server 'Microsoft.Sql/servers@2022-05-01-preview' = {
@@ -36,8 +38,8 @@ resource server 'Microsoft.Sql/servers@2022-05-01-preview' = {
     
     // administratorLoginPassword: required for server creation - just set to dummy value, will be disabled by deploying '/azureADOnlyAuthentications' later.
     // NOTE: The following only require for the initial server creation. If you are updating an existing server, you can ignore these properties.
-    //administratorLogin: 'sqladmin'    
-    //administratorLoginPassword: guid(serverName)
+    administratorLogin: sqlAdminLoginName
+    administratorLoginPassword: sqlAdminCode
 
     // administrators: The Azure Active Directory administrator of the server. This can only be used at server create time. If used for server update, it will be ignored or it will result in an error. For updates individual APIs will need to be used. 
     administrators: {}
@@ -61,7 +63,7 @@ resource sqlAdminsResource 'Microsoft.Sql/servers/administrators@2022-05-01-prev
 }
 
 // https://learn.microsoft.com/en-us/azure/templates/microsoft.sql/servers/azureadonlyauthentications?pivots=deployment-language-bicep
-resource sqlAzureAdOnly 'Microsoft.Sql/servers/azureADOnlyAuthentications@2022-05-01-preview' = {
+resource sqlAzureAdOnly 'Microsoft.Sql/servers/azureADOnlyAuthentications@2022-05-01-preview' = if (azureADOnlyAuthentication){
   name: 'Default'
   parent: server
   properties: {
@@ -90,6 +92,9 @@ resource serverName_clientIpRule 'Microsoft.Sql/servers/firewallrules@2021-11-01
 }
 
 output sqlServerName string = server.name
+output sqlServerResourceId string = server.id
+output sqlAdmninUserLogin string = sqlAdminLoginName
+output sqlAdminPassKey string = sqlAdminCode
 
 
 // resource Microsoft_Sql_servers_advancedThreatProtectionSettings_serverName_Default 'Microsoft.Sql/servers/advancedThreatProtectionSettings@2021-11-01-preview' = if (enableADS) {

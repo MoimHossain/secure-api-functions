@@ -27,7 +27,7 @@ resource deploymentScriptServerGroupAssignment 'Microsoft.Resources/deploymentSc
     }
   }
   properties: {
-    azPowerShellVersion: '5.0'
+    azPowerShellVersion: '7.4'
     arguments: '-instance "${instance}" -tokenResourceUrl "${tokenResourceUrl}" -dbName "${dbName}" -adObjectName "${adObjectName}" -dbRoleNames "${dbRoleNames}"'
     scriptContent: '''
       param(
