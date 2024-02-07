@@ -6,11 +6,15 @@ param azureADOnlyAuthentication bool = false
 param sqlAdminUserAssignedIdentityName string 
 
 param minimalTlsVersion string = '1.2'
+@allowed([
+  'Enabled'
+  'Disabled'
+])
 param publicNetworkAccess string = 'Enabled'
 
 param primaryUserAssignedIdentityId string = ''
 param federatedClientId string = ''
-param allowAzureIps bool = true
+param allowAzureIps bool = false
 
 param allowClientIp bool = false
 param clientIpValue string = ''

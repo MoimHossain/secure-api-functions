@@ -10,7 +10,8 @@ var serverFarmName = 'nebulaServerFarm'
 var functionAppName = 'nebulaFuncAppx002'
 var allowClientIp = true
 var clientIpValue = '84.87.237.145'
-
+var vnetName = 'nebulavnet001'
+var sqlPrivateEndpointName = 'nebulaSqlPrivateEndpoint'
 
 
 module sqlAdminUAMI 'modules/shared/identity.bicep' = {
@@ -29,16 +30,29 @@ module functionIdentity 'modules/shared/identity.bicep' = {
   }
 }
 
+
+module virtualNetwork 'modules/network/virtual-network.bicep' = {
+  name: vnetName
+  params: {
+    vnetName: vnetName
+    location: location    
+  }
+}
+
+
+
+
 module sqlServer 'modules/data/sql-server.bicep' = {
   name: sqlServerName
   params: {
     serverName: sqlServerName
-    location: location    
+    location: location
+    publicNetworkAccess: 'Disabled'
     sqlAdminUserAssignedIdentityName: sqlAdminUAMI.name
     azureADOnlyAuthentication: false
-    allowClientIp: allowClientIp
-    clientIpValue: clientIpValue
-    allowAzureIps: true
+    // allowClientIp: allowClientIp
+    // clientIpValue: clientIpValue
+    // allowAzureIps: true
   }
   dependsOn: [
     sqlAdminUAMI  
@@ -54,48 +68,47 @@ module sqlDatabase 'modules/data/sql-database.bicep' = {
   }
 }
 
-module serverFarm 'modules/web/server-farm.bicep' = {
-  name: serverFarmName
+module sqlPrivateEndpoint 'modules/network/private-endpoints/private-endpoint.bicep' = {
+  name: sqlPrivateEndpointName
   params: {
     location: location
-    name: serverFarmName
+    vnetId: virtualNetwork.outputs.vnetId
+    createPrivateDns: true
+    privateEndpointName: sqlPrivateEndpointName
+    privateLinkServiceId: sqlServer.outputs.sqlServerResourceId
+    subnetId: virtualNetwork.outputs.dataSubnetId
+    targetSubResource: 'sqlServer' 
   }
 }
 
-module functionApp 'modules/web/function-app.bicep' = {
-  name: functionAppName
-  params: {
-    location: location
-    name: functionAppName
-    functionUAMIName: functionIdentity.name
-    serverFarmId: serverFarm.outputs.serverfarmId    
-  }
-}
-
-
-// module sqlRoleAssignments 'modules/data/sql-database-roles.bicep' = {
-//   name: sqlRoleAssignmentsName
+// module serverFarm 'modules/web/server-farm.bicep' = {
+//   name: serverFarmName
 //   params: {
 //     location: location
-//     name: sqlRoleAssignmentsName
-
-//     adObjectName: functionIdentity.outputs.name
-//     dbName: sqlDatabase.name
-//     dbRoleNames: 'db_owner' // db_datareader--db_datawriter        
-//     scriptManagedIdentityName: sqlAdminUAMI.outputs.name
-//     serverName: sqlServer.outputs.sqlServerName
+//     name: serverFarmName
 //   }
 // }
 
-
-
-// module virtualNetwork 'modules/network/virtual-network.bicep' = {
-//   name: vnetName
+// module functionApp 'modules/web/function-app.bicep' = {
+//   name: functionAppName
 //   params: {
-//     vnetName: vnetName
-//     location: location    
+//     location: location
+//     name: functionAppName
+//     functionUAMIName: functionIdentity.name
+//     serverFarmId: serverFarm.outputs.serverfarmId    
 //   }
 // }
+
+// until here works
+
+
+
+
+
+
+
+
+
 
 // module dnsZone 'modules/network/DnsZone/dns-zone.bicep' = {
 //   name: dnsZoneName
