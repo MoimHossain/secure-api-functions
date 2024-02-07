@@ -24,7 +24,7 @@ module publicIpAddress '../network/ip-address.bicep' = {
   name: publicIpAddressName  
   params: {
     name: publicIpAddressName
-    domainNameLabel: publicIpDnsLabel
+    domainNameLabel: toLower(publicIpDnsLabel)
     location: location
   }
 }

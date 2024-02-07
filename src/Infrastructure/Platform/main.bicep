@@ -59,6 +59,7 @@ module virtualNetwork 'modules/network/virtual-network.bicep' = {
     location: location    
   }
 }
+
 module sqlServer 'modules/data/sql-server.bicep' = {
   name: sqlServerName
   params: {
