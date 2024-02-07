@@ -2,6 +2,7 @@
 param name string
 param serverFarmId string
 param functionUAMIName string
+param delegatedSubnetResourceId string
 param location string = resourceGroup().location
 
 resource functionUAMI 'Microsoft.ManagedIdentity/userAssignedIdentities@2018-11-30' existing = {
@@ -24,6 +25,7 @@ resource functionApp 'Microsoft.Web/sites@2023-01-01' = {
     isXenon: false
     hyperV: false
     vnetRouteAllEnabled: true
+    virtualNetworkSubnetId: delegatedSubnetResourceId
     vnetImagePullEnabled: false
     vnetContentShareEnabled: false
     siteConfig: {
@@ -45,6 +47,8 @@ resource functionApp 'Microsoft.Web/sites@2023-01-01' = {
     storageAccountRequired: false    
   }
 }
+
+
 
 output functionAppId string = functionApp.id
 

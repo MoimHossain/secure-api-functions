@@ -2,16 +2,18 @@ targetScope = 'resourceGroup'
 
 param location string = resourceGroup().location
 
-var sqlAdminUAMIName = 'SQLAdminUAMI'
-var functionIdentityName = 'FuncIdentity'
-var sqlServerName = 'nebulaSrvrx002'
-var sqlDatabaseName = 'nebulasDb'
-var serverFarmName = 'nebulaServerFarm'
-var functionAppName = 'nebulaFuncAppx002'
+var sqlAdminUAMIName = 'SQLAdminUAMITSL0'
+var functionIdentityName = 'FuncIdentityTSL0'
+var sqlServerName = 'nebulaSrvrxTSL0'
+var sqlDatabaseName = 'nebulasDbTSL0'
+var serverFarmName = 'nebulaServerFarmTSL0'
+var functionAppName = 'nebulaFuncAppx00TSL0'
+var vnetName = 'nebulavnetTSL0'
+var sqlPrivateEndpointName = 'nebulaSqlPrivateEndpointTSL0'
+
 var allowClientIp = true
 var clientIpValue = '84.87.237.145'
-var vnetName = 'nebulavnet001'
-var sqlPrivateEndpointName = 'nebulaSqlPrivateEndpoint'
+
 
 
 module sqlAdminUAMI 'modules/shared/identity.bicep' = {
@@ -47,9 +49,12 @@ module sqlServer 'modules/data/sql-server.bicep' = {
   params: {
     serverName: sqlServerName
     location: location
-    publicNetworkAccess: 'Disabled'
+    
     sqlAdminUserAssignedIdentityName: sqlAdminUAMI.name
     azureADOnlyAuthentication: false
+    publicNetworkAccess: 'Disabled'
+
+    // For local testing    
     // allowClientIp: allowClientIp
     // clientIpValue: clientIpValue
     // allowAzureIps: true
@@ -81,23 +86,24 @@ module sqlPrivateEndpoint 'modules/network/private-endpoints/private-endpoint.bi
   }
 }
 
-// module serverFarm 'modules/web/server-farm.bicep' = {
-//   name: serverFarmName
-//   params: {
-//     location: location
-//     name: serverFarmName
-//   }
-// }
+module serverFarm 'modules/web/server-farm.bicep' = {
+  name: serverFarmName
+  params: {
+    location: location
+    name: serverFarmName
+  }
+}
 
-// module functionApp 'modules/web/function-app.bicep' = {
-//   name: functionAppName
-//   params: {
-//     location: location
-//     name: functionAppName
-//     functionUAMIName: functionIdentity.name
-//     serverFarmId: serverFarm.outputs.serverfarmId    
-//   }
-// }
+module functionApp 'modules/web/function-app.bicep' = {
+  name: functionAppName
+  params: {
+    location: location
+    name: functionAppName
+    delegatedSubnetResourceId: virtualNetwork.outputs.backendSubnetId
+    functionUAMIName: functionIdentity.name
+    serverFarmId: serverFarm.outputs.serverfarmId    
+  }
+}
 
 // until here works
 

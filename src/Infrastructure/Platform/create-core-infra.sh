@@ -1,6 +1,6 @@
 #!/bin/bash
 
-export resourceGroupName="APIM-DEVOPS-DEMO2"
+export resourceGroupName="APIM-DEVOPS-ZOHAIB-DEVX-RG"
 export location="westeurope"
 export APP_NAME="casazulx"
 export APP_ENV="devx"
