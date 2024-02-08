@@ -1,4 +1,9 @@
 
+## To enable the public network access and add the IP security restrictions to the function app
+
+# Get local machine IP address
+localMachineIP=$(curl -s ifconfig.me)
+echo "Local Machine IP: $localMachineIP"
 
 bodyJson=$(cat <<EOF
 {
@@ -10,7 +15,7 @@ bodyJson=$(cat <<EOF
         "scmIpSecurityRestrictionsDefaultAction": "Deny",
         "scmIpSecurityRestrictions": [
               {
-                "ipAddress": "84.87.237.145/32",
+                "ipAddress": "$localMachineIP/32",
                 "action": "Allow",
                 "tag": "Default",
                 "priority": 100,
@@ -29,9 +34,20 @@ bodyJson=$(cat <<EOF
 EOF
 )
 
+## To Disable the public network access to the function app
+# bodyJson=$(cat <<EOF
+# {
+#   "properties": {
+#     "publicNetworkAccess": "Disabled"
+#   }
+# }   
+# EOF
+# )
+
+# Log the bodyJson
 echo $bodyJson
 
-
+# Apply the changes to the function app
 az resource patch \
         --name cqalx01-funcapp-DV \
         --resource-group APIM-DEVOPS-CASAULRGX \
